@@ -91,8 +91,17 @@ class Travel:
         +'  返回机场: ' + self.in_bound_flight.dep_port   
         +'  总价(NOK): ' + str(self.price)    
         +'  总天数: ' + str(self.days) 
-        +'  工作日天数: ' + str(self.work_days))       
+        +'  工作日天数: ' + str(self.work_days))  
+    def __eq__(self, other):
+        print(self.__dict__)
+        print(other.__dict__)
+        return self.out_bound_flight.dep_port == other.out_bound_flight.dep_port  and \
+        self.in_bound_flight.dep_port == other.in_bound_flight.dep_port  and \
+        self.out_bound_flight.date == other.out_bound_flight.date  and \
+        self.in_bound_flight.date == other.in_bound_flight.date
 
+    def __hash__(self):
+        return hash((self.out_bound_flight.dep_port,self.in_bound_flight.dep_port, self.out_bound_flight.date,self.in_bound_flight.date))
 class Flight:   
     def __init__(self, date, price, dep_port, des_port):
         self.date = date
@@ -178,7 +187,6 @@ def travel_filter(in_flight, out_flight):
     work_day = workDays(out_flight.date.date(),in_flight.date.date())   
     if travel_days>= min_travel_days and travel_days <= max_travel_days and in_flight.price+out_flight.price <= max_price and travel_days > work_day.daysCount():
         #generate a travel
-        print('Add one travel')
         travel = Travel(out_flight,in_flight,in_flight.price+out_flight.price,travel_days, work_day.daysCount())
         travel_list.append(travel)
 def collect_flights_data(depart,arrival,start_year,start_month,length = 12):
@@ -213,13 +221,18 @@ def main():
     for depart in depart_ports:
         for des in des_ports:
 
-            a,b =collect_flights_data(depart,des,2022,7,12)
+            a,b =collect_flights_data(depart,des,2022,8)
 
             Iterate_flights(a,b)
-            print(len(travel_list))
-    travel_list.sort(key=lambda x:(x.price,x.work_days))
+            
+    print(len(travel_list))        
+    a_list = list(set(travel_list))
+
+    a_list.sort(key=lambda x:(x.price,x.work_days))
+
     f=codecs.open('c:\python\\'+datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
-    for travel in travel_list:
+
+    for travel in a_list:
         print(travel.display('en')) 
         f.write(travel.display('en')+'\n')
     f.close()
