@@ -77,19 +77,19 @@ class Travel:
         self.work_days = work_days
     def display(self, lan = ''):
         if lan == 'en':
-             return ('Departure date :' + str(self.out_bound_flight.date) +'  '+ self.out_bound_flight.date.strftime("%A")        
-        +'  Return home date : ' + str(self.in_bound_flight.date) + '  '+ self.in_bound_flight.date.strftime("%A")
+             return ('Departure date :' + str(self.out_bound_flight.date) +'  '+ self.out_bound_flight.date.strftime("%A").ljust(9)        
+        +'  Return home date : ' + str(self.in_bound_flight.date) + '  '+ self.in_bound_flight.date.strftime("%A").ljust(9)
         +'  Departure airport : ' + self.out_bound_flight.dep_port        
         +'  Return airport : ' + self.in_bound_flight.dep_port   
-        +'  Price (NOK): ' + str(self.price)    
+        +'  Price (NOK): ' + str(round(self.price,2))    
         +'  overall days: ' + str(self.days) 
         +'  overall working days: ' + str(self.work_days))  
         else :
-            return ('出发日期： ' + str(self.out_bound_flight.date) +'  '+ self.out_bound_flight.date.strftime("%A")        
-        +'  回家日期： ' + str(self.in_bound_flight.date) + '  '+ self.in_bound_flight.date.strftime("%A")
+            return ('出发日期： ' + str(self.out_bound_flight.date) +'  '+ self.out_bound_flight.date.strftime("%A").ljust(9)        
+        +'  回家日期： ' + str(self.in_bound_flight.date) + '  '+ self.in_bound_flight.date.strftime("%A").ljust(9)
         +'  出发机场: ' + self.out_bound_flight.dep_port        
         +'  返回机场: ' + self.in_bound_flight.dep_port   
-        +'  总价(NOK): ' + str(self.price)    
+        +'  总价(NOK): ' + str(round(self.price,2))    
         +'  总天数: ' + str(self.days) 
         +'  工作日天数: ' + str(self.work_days))  
     def __eq__(self, other):
