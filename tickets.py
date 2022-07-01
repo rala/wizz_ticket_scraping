@@ -10,7 +10,7 @@ import codecs
 #payload={"flightList":[{"departureStation":"SVG","arrivalStation":"GDN","from":"2022-07-01","to":"2022-08-01"},{"departureStation":"GDN","arrivalStation":"SVG","from":"2022-08-01","to":"2022-09-01"}],"priceType":"wdc","adultCount":1,"childCount":0,"infantCount":0}
 # payload={'flightList':[{"departureStation": "SVG", "arrivalStation": "GDN", "from": "2022-07-01", "to": "2022-08-01"}], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
 wizz_payload={'flightList':[], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
-wizz_url = "https://be.wizzair.com/12.10.0/Api/search/timetable"
+wizz_url = "https://be.wizzair.com/12.11.2/Api/search/timetable"
 outboundflights = []
 inboundflights = []
 des_ports = ['KTW','SZZ','KRK','GDN','KUN']
@@ -191,7 +191,7 @@ def travel_filter(in_flight, out_flight):
         travel = Travel(out_flight,in_flight,in_flight.price+out_flight.price,travel_days, work_day.daysCount())
         travel_list.append(travel)
 
-def collect_flights_data(depart,arrival,start_year,start_month,length = 12):
+def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,start_month=datetime.date.today().month,length = 12):
     out_flight_list = []
     return_flight_list = []
     year = start_year
@@ -223,7 +223,7 @@ def main():
     for depart in depart_ports:
         for des in des_ports:
 
-            a,b =collect_flights_data(depart,des,2022,7)
+            a,b =collect_flights_data(depart,des)
 
             Iterate_flights(a,b)
             
