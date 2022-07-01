@@ -6,6 +6,7 @@ import requests
 import json 
 import copy
 import codecs
+
 #payload={"flightList":[{"departureStation":"SVG","arrivalStation":"GDN","from":"2022-07-01","to":"2022-08-01"},{"departureStation":"GDN","arrivalStation":"SVG","from":"2022-08-01","to":"2022-09-01"}],"priceType":"wdc","adultCount":1,"childCount":0,"infantCount":0}
 # payload={'flightList':[{"departureStation": "SVG", "arrivalStation": "GDN", "from": "2022-07-01", "to": "2022-08-01"}], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
 wizz_payload={'flightList':[], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
@@ -189,6 +190,7 @@ def travel_filter(in_flight, out_flight):
         #generate a travel
         travel = Travel(out_flight,in_flight,in_flight.price+out_flight.price,travel_days, work_day.daysCount())
         travel_list.append(travel)
+
 def collect_flights_data(depart,arrival,start_year,start_month,length = 12):
     out_flight_list = []
     return_flight_list = []
@@ -221,7 +223,7 @@ def main():
     for depart in depart_ports:
         for des in des_ports:
 
-            a,b =collect_flights_data(depart,des,2022,8)
+            a,b =collect_flights_data(depart,des,2022,7)
 
             Iterate_flights(a,b)
             
@@ -230,11 +232,11 @@ def main():
 
     a_list.sort(key=lambda x:(x.price,x.work_days))
 
-    f=codecs.open('c:\python\\'+datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
+    f=codecs.open('wizzair'+datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
 
     for travel in a_list:
         print(travel.display('en')) 
-        f.write(travel.display('en')+'\n')
+        f.write(travel.display()+'\n')
     f.close()
 if __name__ == "__main__":
         debug = 0
