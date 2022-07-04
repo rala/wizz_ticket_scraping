@@ -17,10 +17,11 @@ outboundflights = []
 inboundflights = []
 des_ports = ['KTW','SZZ','KRK','GDN','KUN']
 depart_ports = ['SVG']
-travel_list = []
 min_travel_days = 3
 max_travel_days = 7
 max_price = 800
+WIZZ_ROUTES = {'SVG':['KTW','SZZ','KRK','GDN','KUN'], \
+                'KTW':['TIA','BOJ','SPU','LCA','KUT','CGN','DTM','ATH','CFU','KEF','TLV','AHO','CTA','BGY','NAP','CIA','FCO','MLA','TGD','EIN','BGO','TRF','SVG','FNC','BCN','CDT','FUE','IBZ','AGP','PMI','TFS','MMX','NYO','AUH','DXB','BRS','DSA','LPL','LTN'] }
 
 def flight_json_obj_creator(depart, arrival,start_date,end_date):
     flight = {}
@@ -30,13 +31,13 @@ def flight_json_obj_creator(depart, arrival,start_date,end_date):
     flight['to'] = end_date
     return flight
 
-def date_creator_from_month(year,month):
+def date_creator_from_month(year,month,day = '01'):
     start_date = ''
-    start_date = str(year) + '-' + str(month) + '-01'
+    start_date = str(year) + '-' + str(month).rjust(2,'0') + '-' + str(day)
     if month == 12:
         end_date = str(year+1) + '-' + '01' + '-01'
     else:        
-        end_date = str(year) + '-' + str (month+1) + '-01'
+        end_date = str(year) + '-' + str (month+1).rjust(2,'0') + '-' + str(day)
     return start_date, end_date
 
 def getLinks(url,payload):
@@ -84,25 +85,27 @@ def currency_change(price):
     return  price['amount'] * currency.get(price['currencyCode'],0)
 
 def Iterate_flights(out_flights_list,in_flights_list):
+    travel_list = []
     for out_flight in out_flights_list:
         for in_flight in in_flights_list:
             #find all possible flights
-            travel_filter(in_flight, out_flight)
-
-def travel_filter(in_flight, out_flight):
-
+            travel_filter(in_flight, out_flight,travel_list)
+    return travel_list
+def travel_filter(in_flight, out_flight,a_list):
+    
     travel_days=(in_flight.date.date() - out_flight.date.date()).days + 1
     work_day = WorkDays(out_flight.date.date(),in_flight.date.date())   
     if travel_days>= min_travel_days and travel_days <= max_travel_days and in_flight.price+out_flight.price <= max_price and travel_days > work_day.daysCount():
         #generate a travel
         travel = Travel(out_flight,in_flight,in_flight.price+out_flight.price,travel_days, work_day.daysCount())
-        travel_list.append(travel)
+        a_list.append(travel)
 
-def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,start_month=datetime.date.today().month,length = 12):
+def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,start_month=datetime.date.today().month,start_day=datetime.date.today().day,length = 12):
     out_flight_list = []
     return_flight_list = []
     year = start_year
     month = start_month
+    day = start_day
     out_payload = copy.deepcopy(wizz_payload)
     return_payload = copy.deepcopy(wizz_payload)
     out_payload['flightList'].extend(('',''))
@@ -110,7 +113,7 @@ def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,st
         if month > 12:
             month = 1
             year = year + 1
-        start,end = date_creator_from_month(year,month)
+        start,end = date_creator_from_month(year,month,day)
         o_data = flight_json_obj_creator(depart,arrival,start,end)
         r_data = flight_json_obj_creator(arrival,depart,start,end)
         out_payload['flightList'][0] = o_data
@@ -122,24 +125,24 @@ def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,st
         out_flight_list = out_flight_list + o_list
         return_flight_list = return_flight_list + r_list
         month = month + 1
+        day = 1
 
     return out_flight_list, return_flight_list
 
-
 def main():
-    for depart in depart_ports:
-        for des in des_ports:
+    travels = []
+    depart = 'SVG'
+    for des in WIZZ_ROUTES.get(depart):
 
-            a,b =collect_flights_data(depart,des)
+        a,b =collect_flights_data(depart,des)
 
-            Iterate_flights(a,b)
-            
-    print(len(travel_list))        
-    a_list = list(set(travel_list))
+        travels = travels + Iterate_flights(a,b)
+                   
+    a_list = list(set(travels))
 
     a_list.sort(key=lambda x:(x.price,x.work_days))
 
-    f=codecs.open('wizzair'+datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
+    f=codecs.open('wizzair scraping '+depart + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
 
     for travel in a_list:
         print(travel.display('en')) 
