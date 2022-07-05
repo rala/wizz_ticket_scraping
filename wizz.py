@@ -33,11 +33,11 @@ def flight_json_obj_creator(depart, arrival,start_date,end_date):
 
 def date_creator_from_month(year,month,day = '01'):
     start_date = ''
-    start_date = str(year) + '-' + str(month).rjust(2,'0') + '-' + str(day)
+    start_date = str(year) + '-' + str(month).rjust(2,'0') + '-' + str(day).rjust(2,'0')
     if month == 12:
         end_date = str(year+1) + '-' + '01' + '-01'
     else:        
-        end_date = str(year) + '-' + str (month+1).rjust(2,'0') + '-' + str(day)
+        end_date = str(year) + '-' + str (month+1).rjust(2,'0') + '-' + str(day).rjust(2,'0')
     return start_date, end_date
 
 def getLinks(url,payload):
