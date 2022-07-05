@@ -1,3 +1,4 @@
+from ssl import ALERT_DESCRIPTION_CLOSE_NOTIFY
 from urllib.request import urlopen
 import datetime
 import random
@@ -20,9 +21,11 @@ depart_ports = ['SVG']
 min_travel_days = 3
 max_travel_days = 7
 max_price = 800
-WIZZ_ROUTES = {'SVG':['KTW','SZZ','KRK','GDN','KUN'], \
-                'KTW':['TIA','BOJ','SPU','LCA','KUT','CGN','DTM','ATH','CFU','KEF','TLV','AHO','CTA','BGY','NAP','CIA','FCO','MLA','TGD','EIN','BGO','TRF','SVG','FNC','BCN','CDT','FUE','IBZ','AGP','PMI','TFS','MMX','NYO','AUH','DXB','BRS','DSA','LPL','LTN'] }
-
+WIZZ_ROUTES = \
+    {'SVG':['KTW'], \
+                #{'SVG':['KTW','SZZ','KRK','GDN','KUN'], \
+                # 'KTW':['TIA','BOJ','SPU','LCA','KUT','CGN','DTM','ATH','CFU','KEF','TLV','AHO','CTA','BGY','NAP','CIA','FCO','MLA','TGD','EIN','BGO','TRF','SVG','FNC','BCN','CDT','FUE','IBZ','AGP','PMI','TFS','MMX','NYO','AUH','DXB','BRS','DSA','LPL','LTN'] }
+                'KTW':['TIA','BOJ']}
 def flight_json_obj_creator(depart, arrival,start_date,end_date):
     flight = {}
     flight['departureStation'] = depart
@@ -129,6 +132,19 @@ def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,st
 
     return out_flight_list, return_flight_list
 
+def iterate_travels(travel_list_1, travel_list_2):
+    merged_travel_list = []
+    for travel1 in travel_list_1:
+        for travel2 in travel_list_2:
+            # print(travel1.display())
+            # print(travel2.display())
+            joint_travel_filter(travel1, travel2,merged_travel_list)
+    return merged_travel_list
+def joint_travel_filter(travel_1, travel_2,a_joint_list):
+    
+    if travel_1.out_bound_flight.date < travel_2.out_bound_flight.date and travel_1.in_bound_flight.date > travel_2.in_bound_flight.date :
+        a_joint_list.append(JointTravels(travel_1,travel_2))
+
 def main():
     travels = []
     depart = 'SVG'
@@ -140,13 +156,35 @@ def main():
                    
     a_list = list(set(travels))
 
-    a_list.sort(key=lambda x:(x.price,x.work_days))
+    # a_list.sort(key=lambda x:(x.price,x.work_days))
+    travels.clear()
+    depart = 'KTW'
+    for des in WIZZ_ROUTES.get(depart):
+
+        a,b =collect_flights_data(depart,des)
+
+        travels = travels + Iterate_flights(a,b)
+                   
+    b_list = list(set(travels))
+
+    # b_list.sort(key=lambda x:(x.price,x.work_days))
+    travels.clear()
+    travels = iterate_travels(a_list,b_list)
+    travels.sort(key=lambda x:(x.travels[0].price + x.travels[1].price))
+    for tr in travels:
+        print(tr.display())
 
     f=codecs.open('wizzair scraping '+depart + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
 
     for travel in a_list:
         print(travel.display('en')) 
         f.write(travel.display()+'\n')
+    for travel in b_list:
+        print(travel.display('en')) 
+        f.write(travel.display()+'\n')
+    for travel in travels:
+        print(travel.display()) 
+        f.write(travel.display()+'\n')        
     f.close()
 if __name__ == "__main__":
         debug = 0
