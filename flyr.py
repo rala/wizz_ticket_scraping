@@ -62,13 +62,13 @@ def travel_filter(in_flight, out_flight,a_list):
         travel = Travel(out_flight,in_flight,in_flight.price+out_flight.price,travel_days, work_day.daysCount())
         a_list.append(travel)
 
-depart = 'SVG'
+depart = 'TRD'
 travels = []
 flyr = Flyr()
-flyr.find_all_des_from_depart('SVG')
+flyr.find_all_des_from_depart(depart)
 for des in flyr.des:
-    a = flyr.collect_flights_data('SVG',des)
-    b = flyr.collect_flights_data(des,'SVG')
+    a = flyr.collect_flights_data(depart,des)
+    b = flyr.collect_flights_data(des,depart)
     travels = travels + Iterate_flights(a,b)
 
 
