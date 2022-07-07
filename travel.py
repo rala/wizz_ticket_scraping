@@ -49,13 +49,13 @@ class JointTravels:
         self.travels = [travel1,travel2]
     def display(self):
         return (self.travels[0].out_bound_flight.dep_port + '-->' + self.travels[0].out_bound_flight.des_port  
-        +'   date :' + self.travels[0].out_bound_flight.date.strftime("%A").ljust(9) 
+        +'   date :' + str(self.travels[0].out_bound_flight.date) +'  ' +self.travels[0].out_bound_flight.date.strftime("%A").ljust(9) 
         +self.travels[1].out_bound_flight.dep_port + '-->' + self.travels[1].out_bound_flight.des_port 
-        +'   date :' + self.travels[1].out_bound_flight.date.strftime("%A").ljust(9) 
+        +'   date :' + str(self.travels[1].out_bound_flight.date) +'  ' +self.travels[1].out_bound_flight.date.strftime("%A").ljust(9) 
         +self.travels[1].in_bound_flight.dep_port + '-->'  +self.travels[1].in_bound_flight.des_port  
-        +'   date :' + self.travels[0].out_bound_flight.date.strftime("%A").ljust(9) 
+        +'   date :' + str(self.travels[1].in_bound_flight.date) +'  ' +self.travels[0].out_bound_flight.date.strftime("%A").ljust(9) 
         +self.travels[0].in_bound_flight.dep_port + '-->' +self.travels[0].in_bound_flight.des_port 
-        +'   date :' + self.travels[0].in_bound_flight.date.strftime("%A").ljust(9) 
+        +'   date :' + str(self.travels[0].in_bound_flight.date) +'  ' +self.travels[0].in_bound_flight.date.strftime("%A").ljust(9) 
         +'   total price (NOK) : ' + str(round(self.travels[0].price + self.travels[1].price,2))      
         #+'   overall days  :' +self.travels[0].days + self.travels[1].days
         )
