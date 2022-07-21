@@ -12,7 +12,7 @@ from travel import *
 #payload={"flightList":[{"departureStation":"SVG","arrivalStation":"GDN","from":"2022-07-01","to":"2022-08-01"},{"departureStation":"GDN","arrivalStation":"SVG","from":"2022-08-01","to":"2022-09-01"}],"priceType":"wdc","adultCount":1,"childCount":0,"infantCount":0}
 # payload={'flightList':[{"departureStation": "SVG", "arrivalStation": "GDN", "from": "2022-07-01", "to": "2022-08-01"}], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
 wizz_payload={'flightList':[], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
-wizz_url = "https://be.wizzair.com/12.11.2/Api/search/timetable"
+wizz_url = "https://be.wizzair.com/12.13.0/Api/search/timetable"
 outboundflights = []
 inboundflights = []
 des_ports = ['KTW','SZZ','KRK','GDN','KUN']
@@ -120,12 +120,13 @@ def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,st
         out_payload['flightList'][1] = r_data
         print(out_payload)
         o_list,r_list = getLinks(wizz_url,out_payload)
-        if(not o_list and not r_list):
-            break
-        out_flight_list = out_flight_list + o_list
-        return_flight_list = return_flight_list + r_list
         month = month + 1
         day = 1
+        if(not o_list and not r_list):
+            continue
+        out_flight_list = out_flight_list + o_list
+        return_flight_list = return_flight_list + r_list
+
 
     return out_flight_list, return_flight_list
 
