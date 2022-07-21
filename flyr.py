@@ -41,9 +41,11 @@ class Flyr:
         json_data = json.loads(html.content)
         f_list = json_data.get('fares')
         for f in f_list:
-            flight = Flight(datetime.datetime.strptime(f['date'],"%Y-%m-%d"),f['lowestFare'],depart,des)
-            print(flight.display())
-            out_bound_flights.append(flight)
+            #sometime price is not a int but a fault, must ignore this
+            if isinstance(f['lowestFare'], int):                         
+                flight = Flight(datetime.datetime.strptime(f['date'],"%Y-%m-%d"),f['lowestFare'],depart,des)
+                print(flight.display())
+                out_bound_flights.append(flight)
         return out_bound_flights
 
 def Iterate_flights(out_flights_list,in_flights_list):
@@ -62,7 +64,7 @@ def travel_filter(in_flight, out_flight,a_list):
         travel = Travel(out_flight,in_flight,in_flight.price+out_flight.price,travel_days, work_day.daysCount())
         a_list.append(travel)
 
-depart = 'TRD'
+depart = 'SVG'
 travels = []
 flyr = Flyr()
 flyr.find_all_des_from_depart(depart)
