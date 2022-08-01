@@ -19,12 +19,13 @@ inboundflights = []
 des_ports = ['KTW','SZZ','KRK','GDN','KUN']
 depart_ports = ['SVG']
 min_travel_days = 3
-max_travel_days = 7
+max_travel_days = 10
 max_price = 800
 WIZZ_ROUTES = \
-                {'SVG':['KTW','SZZ','KRK','GDN','KUN'], \
-                # 'KTW':['TIA','BOJ','SPU','LCA','KUT','CGN','DTM','ATH','CFU','KEF','TLV','AHO','CTA','BGY','NAP','CIA','FCO','MLA','TGD','EIN','BGO','TRF','SVG','FNC','BCN','CDT','FUE','IBZ','AGP','PMI','TFS','MMX','NYO','AUH','DXB','BRS','DSA','LPL','LTN'] }
-                'KTW':['TIA','BOJ']}
+                {'SVG':['KTW','SZZ','GDN','KUN'], \
+                'KTW':['TIA','BOJ','SPU','LCA','KUT','CGN','DTM','ATH','CFU','KEF','TLV','AHO','CTA','BGY','NAP','CIA','FCO','MLA','TGD','EIN','BGO','TRF','SVG','FNC','BCN','CDT','FUE','IBZ','AGP','PMI','TFS','MMX','NYO','AUH','DXB','BRS','DSA','LPL','LTN'],
+                'GDN':['BOJ','SPU','LCA','BLL','TKU','BVA','KUT','CGN','DTM','HAM','HER','JTR','KEF','BGY','EIN','BCN','GOT','MMX','SFT','NYO','ABZ','DSA','EDI','LPL','LTN']}
+                # 'KTW':['TIA','BOJ']}
 
 # WIZZ_ROUTES = { \
 #             'SVG':['KTW','SZZ'], \
@@ -119,7 +120,6 @@ def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,st
     month = start_month
     day = start_day
     out_payload = copy.deepcopy(wizz_payload)
-    return_payload = copy.deepcopy(wizz_payload)
     out_payload['flightList'].extend(('',''))
     for i in range(length):
         if month > 12:
@@ -164,6 +164,7 @@ def joint_travel_filter(travel_1, travel_2,a_joint_list):
 def wizz_scraping(depart, depth = 1):
     travels = []
     transfer_travels = []
+    direct_travel_list = []
     a_list = []
     if depth == 1:
         for des in WIZZ_ROUTES.get(depart):
@@ -176,18 +177,20 @@ def wizz_scraping(depart, depth = 1):
         return a_list, None
     elif depth == 2:
         for city in WIZZ_ROUTES.get(depart):        
-            a_list.clear()    
+            travels.clear() 
+            a_list.clear()   
             a,b =collect_flights_data(depart,city)
-            travels = travels + Iterate_flights(a,b)                        
+            travels = Iterate_flights(a,b)                        
             a_list = list(set(travels))
+            direct_travel_list = direct_travel_list +a_list
+            travels.clear()
             for des in WIZZ_ROUTES.get(city) or []:
-                travels.clear()
                 c,d=collect_flights_data(city,des)
                 if(c and d):
                     travels = travels + Iterate_flights(c,d)
                     b_list = list(set(travels))        
                     transfer_travels =transfer_travels + iterate_travels(a_list,b_list)
-        return a_list,transfer_travels   
+        return direct_travel_list,transfer_travels   
 
 def main():
     # travels = []
@@ -220,7 +223,7 @@ def main():
     depart = 'SVG'
     b_list, travels =  wizz_scraping(depart, 2)
     b_list.sort(key=lambda x:(x.price,x.work_days))
-    travels.sort(key=lambda x:(x.travels[0].price + x.travels[1].price))
+
     f=codecs.open('wizzair scraping '+depart + datetime.datetime.now().strftime('%Y-%m-%d')+'.txt','w',encoding='utf-8')
 
     # for travel in a_list:
@@ -231,12 +234,13 @@ def main():
             print(travel.display('en')) 
             f.write(travel.display('en')+'\n')
 
-    f.write('transfer flights below: \n ')
-
-    for travel in travels:
-        if travel != None:
-            print(travel.display()) 
-            f.write(travel.display()+'\n')        
+    f.write('transfer flights below: \n')
+    if travels != None:
+        travels.sort(key=lambda x:(x.travels[0].price + x.travels[1].price))
+        for travel in travels:
+            if travel != None:
+                print(travel.display()) 
+                f.write(travel.display()+'\n')        
     f.close()
 if __name__ == "__main__":
         debug = 0
