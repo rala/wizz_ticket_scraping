@@ -8,11 +8,15 @@ import copy
 import codecs
 from workdays import *
 from travel import *
+from selenium import webdriver
+from seleniumrequests import Chrome
+import time
 
 #payload={"flightList":[{"departureStation":"SVG","arrivalStation":"GDN","from":"2022-07-01","to":"2022-08-01"},{"departureStation":"GDN","arrivalStation":"SVG","from":"2022-08-01","to":"2022-09-01"}],"priceType":"wdc","adultCount":1,"childCount":0,"infantCount":0}
 # payload={'flightList':[{"departureStation": "SVG", "arrivalStation": "GDN", "from": "2022-07-01", "to": "2022-08-01"}], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
 wizz_payload={'flightList':[], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
 wizz_url = "https://be.wizzair.com/12.17.0/Api/search/timetable"
+
 outboundflights = []
 inboundflights = []
 des_ports = ['KTW','KRK','SZZ','KRK','GDN','KUN']
@@ -43,7 +47,13 @@ def date_creator_from_month(year,month,day = '01'):
 def getLinks(url,payload):
     out_flight_list = []
     return_flight_list = []
-    html = requests.post(url,json = payload)
+    print(url)
+    print(payload)
+    web_driver = Chrome()
+
+    #html = requests.post(url,json = payload)
+    html = web_driver.request('POST',url, json=payload)
+    web_driver.close()
     print(html.content)
     # bs = BeautifulSoup(html.content, 'html.parser')
     # print(bs) 
