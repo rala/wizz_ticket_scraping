@@ -8,14 +8,14 @@ import copy
 import codecs
 from workdays import *
 from travel import *
-from selenium import webdriver
-from seleniumrequests import Chrome
+#from selenium.webdriver.chrome.service import Service
+from seleniumrequests import Remote,Firefox
 import time
 
 #payload={"flightList":[{"departureStation":"SVG","arrivalStation":"GDN","from":"2022-07-01","to":"2022-08-01"},{"departureStation":"GDN","arrivalStation":"SVG","from":"2022-08-01","to":"2022-09-01"}],"priceType":"wdc","adultCount":1,"childCount":0,"infantCount":0}
 # payload={'flightList':[{"departureStation": "SVG", "arrivalStation": "GDN", "from": "2022-07-01", "to": "2022-08-01"}], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
 wizz_payload={'flightList':[], 'priceType': 'wdc', 'adultCount': 1, 'childCount': 0, 'infantCount': 0}
-wizz_url = "https://be.wizzair.com/12.17.0/Api/search/timetable"
+wizz_url = "https://be.wizzair.com/14.0.0/Api/search/timetable"
 
 outboundflights = []
 inboundflights = []
@@ -24,9 +24,9 @@ depart_ports = ['SVG']
 min_travel_days = 3
 max_travel_days = 7
 max_price = 800
-WIZZ_ROUTES = {'SVG':['KTW','SZZ','KRK','GDN','KUN'], \
+WIZZ_ROUTES = {'SVG':['SZZ','KRK','GDN'], \
                 'KTW':['TIA','BOJ','SPU','LCA','KUT','CGN','DTM','ATH','CFU','KEF','TLV','AHO','CTA','BGY','NAP','CIA','FCO','MLA','TGD','EIN','BGO','TRF','SVG','FNC','BCN','CDT','FUE','IBZ','AGP','PMI','TFS','MMX','NYO','AUH','DXB','BRS','DSA','LPL','LTN'] }
-
+web_driver = Firefox()
 def flight_json_obj_creator(depart, arrival,start_date,end_date):
     flight = {}
     flight['departureStation'] = depart
@@ -45,24 +45,29 @@ def date_creator_from_month(year,month,day = '01'):
     return start_date, end_date
 
 def getLinks(url,payload):
+    global web_driver
     out_flight_list = []
     return_flight_list = []
     print(url)
     print(payload)
-    web_driver = Chrome()
+    # time.sleep(5)
 
     #html = requests.post(url,json = payload)
     html = web_driver.request('POST',url, json=payload)
-    web_driver.close()
+    #html = web_driver.request('GET','https://www.google.com/')
+    #web_driver.close()
+    print(html)
     print(html.content)
     # bs = BeautifulSoup(html.content, 'html.parser')
     # print(bs) 
     if(not html.content):
         return out_flight_list, return_flight_list
     json_data = json.loads(html.content)
+
     out_flights = json_data.get('outboundFlights')
     return_flights = json_data.get('returnFlights')
-    print('outbound flights',json_data.get('outboundFlights'))
+    if(not out_flights or not return_flights):
+        return out_flight_list, return_flight_list
 
     for flight in out_flights:
         if flight['priceType'] == 'price':  #some price type is 'checkprice', should be ignored
@@ -143,13 +148,28 @@ def collect_flights_data(depart,arrival,start_year=datetime.date.today().year,st
     return out_flight_list, return_flight_list
 
 def main():
+    global web_driver
+    # service = Service()
+
+    # service.start()
+
+# driver = webdriver.Remote(service.service_url)
+
+# driver.get('http://www.google.com/');
+
+    # web_driver = Remote(
+    #     service.service_url
+    # )
     travels = []
     depart = 'SVG'
+
     for des in WIZZ_ROUTES.get(depart):
 
         a,b =collect_flights_data(depart,des)
 
         travels = travels + Iterate_flights(a,b)
+
+    web_driver.close()    
                    
     a_list = list(set(travels))
 
